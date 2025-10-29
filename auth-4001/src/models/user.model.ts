@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Model, Document } from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -12,13 +12,23 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const User = mongoose.model('User', userSchema);
-
 type userAttrs = {
   email: string;
   password: string;
 };
 
-const buildUser = (attrs: userAttrs) => new User(attrs);
+type UserDoc = Document & {
+  email: string;
+  password: string;
+};
 
-const user = buildUser({ email: 333, password: '' });
+userSchema.statics.buildUser = (attrs: userAttrs) => new User(attrs);
+
+type UserModel = Model<UserDoc> & {
+  buildUser(attrs: userAttrs): UserDoc;
+};
+
+const User = mongoose.model<UserDoc, UserModel>('User', userSchema);
+
+const user1 = User.buildUser({ email: '', password: '' });
+const user2 = new User({ email: '', password: '' });
